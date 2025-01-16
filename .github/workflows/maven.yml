@@ -22,12 +22,7 @@ env:
 jobs:
 
   build:
-    strategy:
-      fail-fast: true
-      matrix:
-        runner:
-          - ubuntu-latest
-    runs-on: ${{ matrix.runner }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK
@@ -71,9 +66,9 @@ jobs:
       - name: check data
         run: ln -s coatjava/validation/advanced-tests/*.hipo . && ls -l
       - name: run trutheff
-        run: coatjava/coatjava/bin/trutheff ./out_electronproton.hipo
-      - name: which jq
-        run: which gq
+        run: coatjava/coatjava/bin/trutheff out_electronproton.hipo
+      - name: run local script
+        run: ./go
 
   final:
     needs:
