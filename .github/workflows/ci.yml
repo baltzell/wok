@@ -40,7 +40,7 @@ jobs:
         run: tar czvf coatjava.tar.gz coatjava
       - uses: actions/upload-artifact@v4
         with:
-          name: build_${{ matrix.runner }}
+          name: build
           retention-days: 1
           path: coatjava.tar.gz
 
@@ -60,7 +60,7 @@ jobs:
           groovy-version: ${{ env.groovy_version }}
       - uses: actions/download-artifact@v4
         with:
-          name: build_ubuntu-latest
+          name: build
       - name: untar build
         run: tar xzvf coatjava.tar.gz
       - name: check data
