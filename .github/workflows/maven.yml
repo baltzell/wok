@@ -38,7 +38,7 @@ jobs:
       - name: get
         run: git clone --depth 1 https://github.com/jeffersonlab/coatjava
       - name: build
-        run: cd coatjava && ./build-coatjava.sh --spotbugs --unittests --quiet -T4
+        run: cd coatjava && ./build-coatjava.sh
       - name: tar
         run: cd coatjava && tar czvf coatjava.tar.gz coatjava && mv coatjava.tar.gz ..
       - uses: actions/upload-artifact@v4
@@ -68,6 +68,8 @@ jobs:
         run: tar xzvf coatjava.tar.gz
       - name: test run-groovy
         run: coatjava/bin/run-groovy
+      - name: hsilop drut
+        run: cd coatjava/validation/advanced-tests && ./run-eb-tests.sh -100 electronproton
 
   final:
     needs:
