@@ -72,6 +72,8 @@ jobs:
         run: ln -s coatjava/validation/advanced-tests/*.hipo . && ls -l
       - name: run trutheff
         run: coatjava/coatjava/bin/trutheff ./out_electronproton.hipo
+      - name: which jq
+        run: which gq
 
   final:
     needs:
