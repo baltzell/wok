@@ -39,43 +39,18 @@ jobs:
         run: git clone --depth 1 https://github.com/jeffersonlab/coatjava
       - name: build
         run: cd coatjava && ./build-coatjava.sh
+      - name: gen
+        run: cd coatjava/validation/advanced-tests && ./run-eb-tests.sh -100 electronproton
       - name: tar
-        run: cd coatjava && tar czvf coatjava.tar.gz coatjava && mv coatjava.tar.gz ..
+        run: tar czvf coatjava.tar.gz coatjava
       - uses: actions/upload-artifact@v4
         with:
           name: build_${{ matrix.runner }}
           retention-days: 1
           path: coatjava.tar.gz
 
-  prep:
-    needs: [ build ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: ${{ env.java_version }}
-          distribution: ${{ env.java_distribution }}
-      - name: setup groovy
-        uses: wtfjoke/setup-groovy@v2
-        with:
-          groovy-version: ${{ env.groovy_version }}
-      - uses: actions/download-artifact@v4
-        with:
-          name: build_ubuntu-latest
-      - name: untar build
-        run: tar xzvf coatjava.tar.gz
-      - name: eb test
-        run: cd coatjava/validation/advanced-tests && ./run-eb-tests.sh -100 electronproton
-      - uses: actions/upload-artifact@v4
-        with:
-          name: build_${{ matrix.runner }}
-          retention-days: 1
-          path: coatjava/validation/advance-tests/out_electronproton.hipo
-
   test:
-    needs: [ prep ]
+    needs: [ build ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -99,7 +74,6 @@ jobs:
   final:
     needs:
       - build
-      - prep
       - test
     runs-on: ubuntu-latest
     steps:
