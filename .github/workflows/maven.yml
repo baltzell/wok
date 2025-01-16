@@ -69,7 +69,9 @@ jobs:
       - name: untar build
         run: tar xzvf coatjava.tar.gz
       - name: check data
-        run: ls -l && ls -l coatjava/validation/advanced-test
+        run: ln -s coatjava/validation/advanced-tests/*.hipo . && ls -l
+      - name: run trutheff
+        run: coatjava/coatjava/bin/trutheff ./out_electronproton.hipo
 
   final:
     needs:
