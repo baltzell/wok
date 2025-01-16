@@ -1,0 +1,80 @@
+name: wokci
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+    tags: [ '*' ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  java_version: 21
+  java_distribution: zulu
+  groovy_version: 4.x
+
+jobs:
+
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        runner:
+          - ubuntu-latest
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.java_version }}
+          distribution: ${{ env.java_distribution }}
+      - name: get
+        run: git clone --depth 1 https://github.com/jeffersonlab/coatjava
+      - name: build
+        run: cd coatjava && ./build-coatjava.sh --spotbugs --unittests --quiet -T4
+      - name: tar
+        run: cd coatjava && tar czvf coatjava.tar.gz coatjava && mv coatjava.tar.gz ..
+      - uses: actions/upload-artifact@v4
+        with:
+          name: build_${{ matrix.runner }}
+          retention-days: 1
+          path: coatjava.tar.gz
+
+  test:
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: ${{ env.java_version }}
+          distribution: ${{ env.java_distribution }}
+      - name: setup groovy
+        uses: wtfjoke/setup-groovy@v2
+        with:
+          groovy-version: ${{ env.groovy_version }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: build_ubuntu-latest
+      - name: untar build
+        run: tar xzvf coatjava.tar.gz
+      - name: test run-groovy
+        run: coatjava/bin/run-groovy
+
+  final:
+    needs:
+      - build
+      - test
+    runs-on: ubuntu-latest
+    steps:
+      - name: pass
+        run: exit 0
+
